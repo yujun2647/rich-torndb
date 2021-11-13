@@ -78,7 +78,7 @@ class TableInit(object):
     @classmethod
     def __is_sql_comment(cls, doc):
         try:
-            CreateSqlValidChecker(doc).create_table_check()
+            CreateSqlValidChecker(doc).create_sql_check()
             return True
         except SqlSyntaxError:
             return False

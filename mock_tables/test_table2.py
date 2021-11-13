@@ -1,4 +1,4 @@
-from rich_torndb import BaseConn
+from rich_torndb.rich_torndb import BaseConn
 
 
 class TestTable2(BaseConn):

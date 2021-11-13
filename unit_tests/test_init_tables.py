@@ -42,3 +42,9 @@ class InitTablesTests(BaseTestCase):
         TableInit()._do_add_index(TestTableAddIndex, sql_formatter)
         index_field = self.get_field_schema_data(table_name, "name")
         self.assertTrue(index_field["Key"] == "MUL")
+
+
+class InitTablesErrorTests(InitTablesTests):
+
+    def test_error_tables(self):
+        from mock_tables import test_error_table
