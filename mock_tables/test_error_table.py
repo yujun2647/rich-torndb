@@ -1,4 +1,4 @@
-from rich_torndb import BaseConn
+from rich_torndb.rich_torndb import BaseConn
 from dev_env import dev_config
 from rich_torndb.init_tables import TableInit
 
@@ -11,13 +11,24 @@ class TestBase(BaseConn):
                                        password=dev_config.MYSQL_ROOT_PASSWORD)
 
 
-class TestTable1(TestBase):
+class TestTableEmpty(TestBase):
     pass
 
 
 class TestTable11(TestBase):
     """
     CREATE TABLE IF NOT EXISTS `test_table`(
+      `id` bigint(20) NOT NULL AUTO_INCREMENT,
+      `user_id` bigint(20) NOT NULL COMMENT 'user_id',
+      PRIMARY KEY (`id`) USING BTREE,
+      UNIQUE KEY `user_id` (`user_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='测试表';
+    """
+
+
+class TestTableMissIfNotExist(TestBase):
+    """
+    CREATE TABLE `test_table_miss_if_not_exist`(
       `id` bigint(20) NOT NULL AUTO_INCREMENT,
       `user_id` bigint(20) NOT NULL COMMENT 'user_id',
       PRIMARY KEY (`id`) USING BTREE,

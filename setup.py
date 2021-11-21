@@ -1,16 +1,4 @@
-from typing import *
 from setuptools import setup
-
-
-def get_requirements() -> List[str]:
-    with open("requirements.txt") as fp:
-        lines = fp.readlines()
-        lines = list(filter(lambda l: not l.startswith("#"), lines))
-        for i, line in enumerate(lines):
-            if line.endswith("\n"):
-                lines[i] = line[:-1]
-        return lines
-
 
 setup(
     name="rich-torndb",
@@ -25,8 +13,6 @@ setup(
     include_package_data=True,
     packages=["rich_torndb",
               "rich_torndb/utils"],
-    install_requires=get_requirements()
+    install_requires=["tqdm~=4.62.2",
+                      "pymysql~=1.0.2"]
 )
-
-if __name__ == "__main__":
-    get_requirements()

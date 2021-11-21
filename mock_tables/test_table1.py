@@ -9,7 +9,7 @@ class TestTable1(TestBase):
 
 class TestTable11(TestBase):
     """
-    CREATE TABLE IF NOT EXISTS `test_table22`(
+    CREATE TABLE IF NOT EXISTS `test_table11`(
       `id` bigint(20) NOT NULL AUTO_INCREMENT,
       `user_id` bigint(20) NOT NULL COMMENT 'user_id',
       `name` varchar(20) NOT NULL COMMENT 'name',

@@ -15,6 +15,8 @@ class TableInit(object):
         "Multiple primary key defined",
     ]
 
+    INITED_TABLE_CLASSES: Set = set()
+
     @classmethod
     def execute_create_sql(cls, _class: ClassVar[BaseConn], create_sql: str):
         db = _class()
@@ -22,10 +24,15 @@ class TableInit(object):
         _class().execute(create_sql)
 
     @classmethod
-    def exec_add_column_sql(cls, _class: ClassVar[BaseConn], add_column_sql: str):
+    def exec_add_column_sql(cls, _class: ClassVar[BaseConn],
+                            add_column_sql: str):
         db = _class()
         db.init_table_process = True
-        db.execute(add_column_sql)
+        try:
+            db.execute(add_column_sql)
+        except Exception as exp:
+            if not cls.is_ignore_error(exp):
+                raise ClassSqlExecuteError(_class, exp)
 
     @classmethod
     def is_ignore_error(cls, exp):
@@ -49,22 +56,21 @@ class TableInit(object):
     def _do_add_column(self, _class: ClassVar[BaseConn],
                        sql_formatter: CreateSqlFormatter):
         add_columns_sql_dict = sql_formatter.get_add_columns_sql_dict()
+        successes = []
         for column, add_column_sql in add_columns_sql_dict.items():
             try:
+                if successes:
+                    add_column_sql += f" AFTER {successes[-1]}"
                 self.exec_add_column_sql(_class, add_column_sql)
-            except Exception as exp:
-                if not self.is_ignore_error(exp):
-                    raise ClassSqlExecuteError(_class, exp)
+                successes.append(column)
+            except ClassSqlExecuteError as exp:
+                raise
 
     def _do_add_index(self, _class: ClassVar[BaseConn],
                       sql_formatter: CreateSqlFormatter):
         add_index_sql_list = sql_formatter.get_add_index_sql_list()
         for add_index_sql in add_index_sql_list:
-            try:
-                self.exec_add_column_sql(_class, add_index_sql)
-            except Exception as exp:
-                if not self.is_ignore_error(exp):
-                    raise ClassSqlExecuteError(_class, exp)
+            self.exec_add_column_sql(_class, add_index_sql)
 
     def do_init(self, _class: ClassVar[BaseConn]):
         create_sql = _class.__doc__
@@ -78,7 +84,7 @@ class TableInit(object):
     @classmethod
     def __is_sql_comment(cls, doc):
         try:
-            CreateSqlValidChecker(doc).create_table_check()
+            CreateSqlValidChecker(doc).create_sql_check()
             return True
         except SqlSyntaxError:
             return False
@@ -86,6 +92,8 @@ class TableInit(object):
     def get_sql_table_subs(self, _class: ClassVar[BaseConn]):
         subs = []
         for c in _class.__subclasses__():
+            if c in self.INITED_TABLE_CLASSES:
+                continue
             if self.__is_sql_comment(c.__doc__):
                 subs.append(c)
             if c.__subclasses__():
@@ -97,3 +105,4 @@ class TableInit(object):
 
         for init_class in init_classes:
             self.do_init(init_class)
+            self.INITED_TABLE_CLASSES.add(init_class)

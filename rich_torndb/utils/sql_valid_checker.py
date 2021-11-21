@@ -23,10 +23,12 @@ ALLOWED_COLUMN_STARTSWITH = ["`", ]
 
 
 class CreateSqlValidChecker(SqlValidChecker):
-
-    def create_table_check(self):
+    def create_sql_check(self):
         if "CREATE TABLE" not in self.sql:
             raise MissingCreateTableSqlError
+
+    def create_table_check(self):
+        self.create_sql_check()
         if "IF NOT EXISTS" not in self.sql:
             raise MissingIfNoExistsSqlError
 
